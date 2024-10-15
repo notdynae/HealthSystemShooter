@@ -5,6 +5,7 @@ public class Player : Actor {
     public static Player instance;
     
     int lastCheckedHealth;
+    int lastCheckedShield;
     int lastCheckedXp;
     int lastCheckedLevel;
 
@@ -20,7 +21,7 @@ public class Player : Actor {
 
     public override void Update() {
         base.Update();
-        if (lastCheckedHealth != healthSystem.health || lastCheckedLevel != healthSystem.level || lastCheckedXp != healthSystem.xp)
+        if (lastCheckedHealth != healthSystem.health || lastCheckedShield != healthSystem.shield || lastCheckedLevel != healthSystem.level || lastCheckedXp != healthSystem.xp)
         {
             HealthUI.instance.textmeshpro.text = healthSystem.ShowHUD();
             lastCheckedHealth = healthSystem.health;

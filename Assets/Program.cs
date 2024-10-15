@@ -91,8 +91,23 @@ public class HealthSystem
 
 	// increases xp and level accordingly
 	public void IncreaseXP(int exp) {
-		xp += Math.Min(0, exp);
+		xp += Math.Max(0, exp);
 		level += xp / 100;
 		xp %= 100;
 	}
+
+	// ------------------------------------------------ debug tests
+
+	//public void Test_TakeDamage_OnlyShield() {
+	//	HealthSystem system = new HealthSystem();
+	//	system.shield = 100;
+	//	system.health = 100;
+	//	system.lives = 3;
+
+	//	system.TakeDamage(10);
+
+	//	Debug.Assert(90 == system.shield);
+	//	Debug.Assert(100 == system.health);
+	//	Debug.Assert(3 == system.lives);
+	//}
 }
