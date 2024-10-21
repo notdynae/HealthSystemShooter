@@ -207,6 +207,29 @@ public class HealthSystem
 
 	// ------------------------------------------------------ xp
 
+	public static void Test_XP_Normal() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.xp = 20;
+		test.IncreaseXP(40);
+		Debug.Assert(60 == test.xp, $"xp is actually {test.xp}");
+	}
+	public static void Test_XP_LvlUp() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.xp = 80;
+		test.IncreaseXP(20);
+		Debug.Assert(0 == test.xp, $"xp is actually {test.xp}");
+		Debug.Assert(2 == test.level, $"xp is actually {test.level}");
+	}	
+	public static void Test_XP_Negative() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.xp = 50;
+		test.IncreaseXP(-20);
+		Debug.Assert(50 == test.xp, $"xp is actually {test.xp}");
+
+	}
 
 	// call every test above
 	public static void RunAllUnitTests() {
@@ -227,5 +250,9 @@ public class HealthSystem
 		Test_Shield_Negative();
 
 		Test_Revive();
+
+		Test_XP_Normal();
+		Test_XP_LvlUp();
+		Test_XP_Negative();
 	}
 }
