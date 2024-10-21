@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using UnityEngine;
+using System.Collections;
 
 public class HealthSystem
 {
@@ -58,12 +60,12 @@ public class HealthSystem
 
 	// heal player health up to maxHealth, by parameter hp
 	public void Heal(int hp) {
-		health = Clamp(health + hp, maxHealth);
+		health = Clamp(health + Clamp(hp, maxHealth), maxHealth);
 	}
 
 	// heal player shield up to maxShield, by parameter hp
 	public void RegenerateShield(int hp) {
-		shield = Clamp(shield + hp, maxShield);
+		shield = Clamp(shield + Clamp(hp, maxShield), maxShield);
 	}
 
 	// revive player if they have lives to spare, otehrwise set game to dead state
@@ -96,18 +98,134 @@ public class HealthSystem
 		xp %= 100;
 	}
 
-	// ------------------------------------------------ debug tests
+	// ---------------------------------------------------------------------------- debug tests
 
-	//public void Test_TakeDamage_OnlyShield() {
-	//	HealthSystem system = new HealthSystem();
-	//	system.shield = 100;
-	//	system.health = 100;
-	//	system.lives = 3;
+	// ------------------------------------------------------ damage
 
-	//	system.TakeDamage(10);
+	public static void Test_TakeDamage_Shield() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.TakeDamage(10);
+		Debug.Assert(90 == test.shield, $"shield is actually {test.shield}");
+		Debug.Assert(100 == test.health, $"health is actually {test.health}");
+	}
+	public static void Test_TakeDamage_HealthShield() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.TakeDamage(150);
+		Debug.Assert(0 == test.shield, $"shield is actually {test.shield}");
+		Debug.Assert(50 == test.health, $"health is actually {test.health}");
+	}	
+	public static void Test_TakeDamage_ShieldDepleted() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.shield = 0;
+		test.TakeDamage(25);
+		Debug.Assert(0 == test.shield, $"shield is actually {test.shield}");
+		Debug.Assert(75 == test.health, $"health is actually {test.health}");
+	}	
+	public static void Test_TakeDamage_HealthZero() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.shield = 0;
+		test.TakeDamage(100);
+		Debug.Assert(100 == test.shield, $"shield is actually {test.shield}");
+		Debug.Assert(100 == test.health, $"health is actually {test.health}");
+		Debug.Assert(2 == test.lives, $"lives is actually {test.lives}");
+	}
+	public static void Test_TakeDamage_ShieldHealthZero() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.TakeDamage(200);
+		Debug.Assert(100 == test.shield, $"shield is actually {test.shield}");
+		Debug.Assert(100 == test.health, $"health is actually {test.health}");
+		Debug.Assert(2 == test.lives, $"lives is actually {test.lives}");
+	}
+	public static void Test_TakeDamage_Negative() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.TakeDamage(-10);
+		Debug.Assert(100 == test.health, "Negative number damage wasn't ignored");
+	}
 
-	//	Debug.Assert(90 == system.shield);
-	//	Debug.Assert(100 == system.health);
-	//	Debug.Assert(3 == system.lives);
-	//}
+	// ------------------------------------------------------ heal
+
+	public static void Test_Heal_Normal() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.health = 50;
+		test.Heal(25);
+		Debug.Assert(75 == test.health, $"health is actually {test.health}");
+	}	
+	public static void Test_Heal_Full() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.Heal(25);
+		Debug.Assert(100 == test.health, $"health is actually {test.health}");
+	}
+	public static void Test_Heal_Negative() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.Heal(-25);
+		Debug.Assert(100 == test.health, $"health is actually {test.health}");
+	}	
+	
+	// ------------------------------------------------------ shield
+
+	public static void Test_Shield_Normal() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.shield = 50;
+		test.RegenerateShield(25);
+		Debug.Assert(75 == test.shield, $"shield is actually {test.shield}");
+	}	
+	public static void Test_Shield_Full() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.RegenerateShield(25);
+		Debug.Assert(100 == test.shield, $"shield is actually {test.shield}");
+	}
+	public static void Test_Shield_Negative() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.RegenerateShield(-25);
+		Debug.Assert(100 == test.shield, $"shield is actually {test.shield}");
+	}
+
+	// ------------------------------------------------------ revive
+
+	public static void Test_Revive() {
+		var test = new HealthSystem();
+		test.ResetGame();
+		test.shield = 0;
+		test.health = 0;
+		test.Revive();
+		Debug.Assert(100 == test.shield, $"shield is actually {test.shield}");
+		Debug.Assert(100 == test.health, $"health is actually {test.health}");
+		Debug.Assert(2 == test.lives, $"lives is actually {test.lives}");
+	}
+
+	// ------------------------------------------------------ xp
+
+
+	// call every test above
+	public static void RunAllUnitTests() {
+
+		Test_TakeDamage_Shield();
+		Test_TakeDamage_HealthShield();
+		Test_TakeDamage_ShieldDepleted();
+		Test_TakeDamage_HealthZero();
+		Test_TakeDamage_ShieldHealthZero();
+		Test_TakeDamage_Negative();
+
+		Test_Heal_Normal();
+		Test_Heal_Full();
+		Test_Heal_Negative();
+
+		Test_Shield_Normal();
+		Test_Shield_Full();
+		Test_Shield_Negative();
+
+		Test_Revive();
+	}
 }

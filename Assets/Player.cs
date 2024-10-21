@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 public class Player : Actor {
     public static Player instance;
     
@@ -9,11 +10,14 @@ public class Player : Actor {
     int lastCheckedXp;
     int lastCheckedLevel;
 
-    public void Awake() {
-        instance = this;
-    }
 
-    public override void Die()
+	public void Awake() {
+		instance = this;
+
+		HealthSystem.RunAllUnitTests();
+	}
+
+	public override void Die()
     {
         base.Die();
         gameObject.SetActive(false);
