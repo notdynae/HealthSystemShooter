@@ -32,7 +32,7 @@ public class Pickup : MonoBehaviour {
                     break;
 
                 case PickupType.Shield:
-                    Player.instance.healthSystem.RegenerateShield(AmountToIncrease);
+                    Player.instance.healthSystem.Regen(AmountToIncrease);
                     break;
 
                 case PickupType.Health:

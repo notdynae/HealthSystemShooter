@@ -1,36 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using UnityEngine;
-using System.Collections;
 
 public class HealthSystem
 {
-	// Variables
+	// --------------- variables //
 	public int health;
 	public int shield;	
 	public int lives;
 	public string healthStatus;
+	public int xp;
+	public int level;
 
+	// ------------------------ constants //
 	const int maxHealth = 100;
 	const int maxShield = 100;
 	const int startLives = 3;
 	const int startLevel = 1;
 
-	// Optional XP system variables
-	public int xp;
-	public int level;
-
 	public HealthSystem() {
 		ResetGame();
 	}
+
+	// ------------------------------------- helper functions //
 
 	// helper function for range clamping
 	private int Clamp(int num, int max) {
 		return Math.Max(0, Math.Min(num, max));
 	}
+
+	// -------------------------------------- gameplay functions //
 
 	// returns hud display as a string
 	public string ShowHUD() {
@@ -42,7 +42,8 @@ public class HealthSystem
 			{ 1, "Imminent Danger" },
 			{ 0, "Dead" }
 		};
-		// Find the key (threshold) that is less than or equal to the health value
+
+		// find the key that is less than or equal to the health value
 		var statusKey = healthStatus.Keys.FirstOrDefault(key => health >= key);
 
 		return $"Health: {health} | Shield: {shield} | Lives: {lives} | Status: {healthStatus[statusKey]} | Level: {level} | XP: {xp}";
@@ -54,7 +55,6 @@ public class HealthSystem
 		shield -= shieldDamage;
 		health -= Clamp(damage - shieldDamage, health);
 
-		// try to revive player when health reaches 0
 		if (health <= 0) Revive();
 	}
 
@@ -64,7 +64,7 @@ public class HealthSystem
 	}
 
 	// heal player shield up to maxShield, by parameter hp
-	public void RegenerateShield(int hp) {
+	public void Regen(int hp) {
 		shield = Clamp(shield + Clamp(hp, maxShield), maxShield);
 	}
 
@@ -82,6 +82,13 @@ public class HealthSystem
 		}
 	}
 
+	// increases xp and level accordingly
+	public void IncreaseXP(int exp) {
+		xp += Math.Max(0, exp);
+		level += xp / 100;
+		xp %= 100;
+	}
+
 	// reset all variables to default values
 	public void ResetGame() {
 		health = maxHealth;
@@ -91,108 +98,105 @@ public class HealthSystem
 		xp = 0;
 	}
 
-	// increases xp and level accordingly
-	public void IncreaseXP(int exp) {
-		xp += Math.Max(0, exp);
-		level += xp / 100;
-		xp %= 100;
+	// -------------------------------------------------------- debug tests //
+
+	// debug helper function
+	public static void DebugInt(int q, int a) {
+		Debug.Assert(q == a, $"value is {q}, should be {a}");
 	}
 
-	// ---------------------------------------------------------------------------- debug tests
-
-	// ------------------------------------------------------ damage
-
+	 //------------------------------------------ damage //
 	public static void Test_TakeDamage_Shield() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.TakeDamage(10);
-		Debug.Assert(90 == test.shield, $"shield is actually {test.shield}");
-		Debug.Assert(100 == test.health, $"health is actually {test.health}");
+		DebugInt(test.shield, 90);
+		DebugInt(test.health, 100);
 	}
 	public static void Test_TakeDamage_HealthShield() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.TakeDamage(150);
-		Debug.Assert(0 == test.shield, $"shield is actually {test.shield}");
-		Debug.Assert(50 == test.health, $"health is actually {test.health}");
+		DebugInt(test.shield, 0);
+		DebugInt(test.health, 50);
 	}	
 	public static void Test_TakeDamage_ShieldDepleted() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.shield = 0;
 		test.TakeDamage(25);
-		Debug.Assert(0 == test.shield, $"shield is actually {test.shield}");
-		Debug.Assert(75 == test.health, $"health is actually {test.health}");
+		DebugInt(test.shield, 0);
+		DebugInt(test.health, 75);
 	}	
 	public static void Test_TakeDamage_HealthZero() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.shield = 0;
 		test.TakeDamage(100);
-		Debug.Assert(100 == test.shield, $"shield is actually {test.shield}");
-		Debug.Assert(100 == test.health, $"health is actually {test.health}");
-		Debug.Assert(2 == test.lives, $"lives is actually {test.lives}");
+		DebugInt(test.shield, 100);
+		DebugInt(test.health, 100);
+		DebugInt(test.lives, 2);
 	}
 	public static void Test_TakeDamage_ShieldHealthZero() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.TakeDamage(200);
-		Debug.Assert(100 == test.shield, $"shield is actually {test.shield}");
-		Debug.Assert(100 == test.health, $"health is actually {test.health}");
-		Debug.Assert(2 == test.lives, $"lives is actually {test.lives}");
+		DebugInt(test.shield, 100);
+		DebugInt(test.health, 100);
+		DebugInt(test.lives, 2);
 	}
 	public static void Test_TakeDamage_Negative() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.TakeDamage(-10);
-		Debug.Assert(100 == test.health, "Negative number damage wasn't ignored");
+		DebugInt(test.health, 100);
 	}
 
-	// ------------------------------------------------------ heal
+	// ------------------------------------ heal //
 
 	public static void Test_Heal_Normal() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.health = 50;
 		test.Heal(25);
-		Debug.Assert(75 == test.health, $"health is actually {test.health}");
+		DebugInt(test.health, 75);
 	}	
 	public static void Test_Heal_Full() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.Heal(25);
-		Debug.Assert(100 == test.health, $"health is actually {test.health}");
+		DebugInt(test.health, 100);
 	}
 	public static void Test_Heal_Negative() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.Heal(-25);
-		Debug.Assert(100 == test.health, $"health is actually {test.health}");
+		DebugInt(test.health, 100);
 	}	
 	
-	// ------------------------------------------------------ shield
+	// -------------------------------------- shield //
 
 	public static void Test_Shield_Normal() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.shield = 50;
-		test.RegenerateShield(25);
-		Debug.Assert(75 == test.shield, $"shield is actually {test.shield}");
+		test.Regen(25);
+		DebugInt(test.shield, 75);
 	}	
 	public static void Test_Shield_Full() {
 		var test = new HealthSystem();
 		test.ResetGame();
-		test.RegenerateShield(25);
-		Debug.Assert(100 == test.shield, $"shield is actually {test.shield}");
+		test.Regen(25);
+		DebugInt(test.shield, 100);
 	}
 	public static void Test_Shield_Negative() {
 		var test = new HealthSystem();
 		test.ResetGame();
-		test.RegenerateShield(-25);
-		Debug.Assert(100 == test.shield, $"shield is actually {test.shield}");
+		test.Regen(-25);
+		DebugInt(test.shield, 100);
 	}
 
-	// ------------------------------------------------------ revive
+	// ------------------------------- revive //
 
 	public static void Test_Revive() {
 		var test = new HealthSystem();
@@ -200,35 +204,34 @@ public class HealthSystem
 		test.shield = 0;
 		test.health = 0;
 		test.Revive();
-		Debug.Assert(100 == test.shield, $"shield is actually {test.shield}");
-		Debug.Assert(100 == test.health, $"health is actually {test.health}");
-		Debug.Assert(2 == test.lives, $"lives is actually {test.lives}");
+		DebugInt(test.shield, 100);
+		DebugInt(test.health, 100);
+		DebugInt(test.lives, 2);
 	}
 
-	// ------------------------------------------------------ xp
+	// ---------------------------------- xp //
 
 	public static void Test_XP_Normal() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.xp = 20;
 		test.IncreaseXP(40);
-		Debug.Assert(60 == test.xp, $"xp is actually {test.xp}");
+		DebugInt(test.xp, 60);
 	}
 	public static void Test_XP_LvlUp() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.xp = 80;
 		test.IncreaseXP(20);
-		Debug.Assert(0 == test.xp, $"xp is actually {test.xp}");
-		Debug.Assert(2 == test.level, $"xp is actually {test.level}");
+		DebugInt(test.xp, 0);
+		DebugInt(test.level, 2);
 	}	
 	public static void Test_XP_Negative() {
 		var test = new HealthSystem();
 		test.ResetGame();
 		test.xp = 50;
 		test.IncreaseXP(-20);
-		Debug.Assert(50 == test.xp, $"xp is actually {test.xp}");
-
+		DebugInt(test.xp, 50);
 	}
 
 	// call every test above
