@@ -18,6 +18,8 @@ public class HealthSystem
 	const int maxShield = 100;
 	const int startLives = 3;
 	const int startLevel = 1;
+	const int xpPerLevel = 100;
+	const int maxLevel = 99;
 
 	public HealthSystem() {
 		ResetGame();
@@ -85,8 +87,8 @@ public class HealthSystem
 	// increases xp and level accordingly
 	public void IncreaseXP(int exp) {
 		xp += Math.Max(0, exp);
-		level += xp / 100;
-		xp %= 100;
+		level = Math.Max(level + (xp / xpPerLevel);
+		xp %= xpPerLevel;
 	}
 
 	// reset all variables to default values
