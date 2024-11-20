@@ -70,7 +70,7 @@ public class HealthSystem
 		shield = Clamp(shield + Clamp(hp, maxShield), maxShield);
 	}
 
-	// revive player if they have lives to spare, otehrwise set game to dead state
+	// revive player if they have lives to spare, otherwise set game to dead state
 	public void Revive() {
 		lives--;
 		if (lives > 0) {
@@ -87,7 +87,7 @@ public class HealthSystem
 	// increases xp and level accordingly
 	public void IncreaseXP(int exp) {
 		xp += Math.Max(0, exp);
-		level = Math.Max(level + (xp / xpPerLevel);
+		level = Clamp(level + (xp / xpPerLevel), 99);
 		xp %= xpPerLevel;
 	}
 
